@@ -665,7 +665,7 @@ void driver_homepage(char username[])
 	printf("\t\t\t\t\t[Press 2]");
 	printf("\t\t\t\t   [Press 3]");
 	printf("\n\n\n\t\t  4.Log Out");
-	printf("\t\t\t\t\t\t\t\t  5.Seetings");
+	printf("\t\t\t\t\t\t\t\t  5.Settings");
 	printf("\n\t           [Press 4]");
 	printf("\t\t\t\t\t\t\t\t  [Press 5]");
 	printf("\n\n\n\n+----------------------------------------------------------------------------------------------------------------------+");
@@ -1109,8 +1109,8 @@ void change_user(int n)
 					ptr = fopen("user_login.bin","wb");
 					fwrite(all,sizeof(struct user),count,ptr);
 					fclose(ptr);
-					printf("\n\n\n\t\t\t\t\t    Password changed successfully!");
-					printf("\n\n\n\t\t\t\t\t\t   Redirecting");
+					printf("\n\n\n\t\t\t\t\t      Password changed successfully!");
+					printf("\n\n\n\t\t\t\t\t\t     Redirecting");
 					for(i=5;i>=1;i--)
 					{
 						printf(".");
