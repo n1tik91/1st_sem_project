@@ -9,12 +9,15 @@ void user_f();
 void bus_company_login();
 void bus_company_signup();
 void bus_company_homepage(char []);
+void change_bus_company(int);
 void driver_login();
 void driver_signup();
 void driver_homepage(char []);
+void change_driver(int);
 void user_login();
 void user_signup();
 void user_homepage(char []);
+void change_user(int);
 
 struct bus_company
 {
@@ -23,6 +26,7 @@ struct bus_company
 	char name[50];
 	int bus_number;
 	char destinations[3][50];
+	char unique_pin[10];
 };
 
 struct driver
@@ -33,6 +37,7 @@ struct driver
 	char license_number[20];
 	int experience;
 	char recruit_status;
+	char unique_pin[10];
 };
 
 struct user
@@ -43,6 +48,7 @@ struct user
 	char card[20];
 	int age;
 	char citizen_no[20];
+	char unique_pin[10];
 };
 
 int main()
@@ -137,13 +143,13 @@ void bus_company_login()
 	system("cls");
 	struct bus_company b;
 	int i,count=0;
-	char userName[50],Pass[50];
+	char userName[50],Pass[50],choice;
 	FILE *ptr;
 	ptr = fopen("bus_company_login.bin","rb");
 	if(ptr==NULL)
 	{
 		printf("\n\n\n\n\n\t\t\t\t\t  There is no bus company registered!");
-		printf("\n\n\n\t\t\t\t\t     Redirecting to SigUp page");
+		printf("\n\n\n\t\t\t\t\t     Redirecting to SignUp page");
 		for(i=5;i>=1;i--)
 		{
 			printf(".");
@@ -176,13 +182,38 @@ void bus_company_login()
 	count++;
 	if(count>=2)
 	{
-		printf("\n\n\t\t\t\t\t\t  Too many attempts!\n\n\t\t\t\t\t    Redirecting to Homepage!");
-		for(i=5;i>=1;i--)
+		ask_forgot_pass:
+		system("cls");
+		printf("\n\n\t\t\t\t\t\t  Too many attempts!\n\n\t\t\t\t\t       Did you forgot your pass?:");
+		printf("\n\n\t\t\t\t\t\t1.Yes [press \'y\' or \'Y\']");
+		printf("\n\n\t\t\t\t\t\t 1.No [press \'n\' or \'N\']");
+		printf("\n\n\n\t\t\t\t\t\t  Enter you choice: ");
+		fflush(stdin);
+		scanf("%c",&choice);
+		if(choice == 'y' || choice == 'Y')
 		{
-			printf(".");
-			Sleep(1000);
+			change_bus_company(0);
 		}
+		else if(choice == 'n' || choice == 'N')
+		{
+			printf("\n\n\t\t\t\t\t    Redirecting to homepage");
+			for(i=5;i>=1;i--)
+			{
+				printf(".");
+				Sleep(1000);
+			}
 			main();
+		}
+		else
+		{
+			printf("\n\n\t\t\t\t\t\t     Invalid Input\n\t\t\t\t\t\t    Redirecting");
+			for(i=5;i>=1;i--)
+			{
+				printf(".");
+				Sleep(1000);
+			}
+			goto ask_forgot_pass;
+		}
 	}
 	goto reenter;
 }
@@ -235,6 +266,15 @@ void bus_company_signup()
 			goto reenter_name;
 		}
 	}
+	unique:
+	fflush(stdin);
+	printf("\n\n\t\t\tEnter unique pin[equal to 5 characters]: ");
+	gets(b.unique_pin);
+	if(strlen(b.unique_pin)!=5)
+	{
+		printf("\n\n\t\tunique pin must be equals to 5 characters! Try again");
+		goto unique;
+	}
 	printf("\n\n\t\t\t\t\t\tTotal bus number: ");
 	scanf("%d",&b.bus_number);
 	system("cls");
@@ -253,7 +293,7 @@ void bus_company_signup()
 	system("cls");
 	printf("\n\n\n\t\t\t\t\t\t\tCongratulations!");
 	printf("\n\n\n\t\t\t\t\tYour comapny has been successfully registered!");
-	printf("\n\n\n\t\t\t\t\t\tLogin Now!");
+	printf("\n\n\n\t\t\t\t\t\t\t    Login Now!");
 	printf("\n\n\n\t\t\t\t\t\tRedirecting");
 	for(i=5;i>=1;i--)
 	{
@@ -267,18 +307,6 @@ void bus_company_homepage(char username[])
 {
 	system("cls");
 	int user_count=0,i,user_choice;
-	FILE *ptr;
-	ptr = fopen("bus_company_login.bin","rb+");
-	if(ptr == NULL)
-	{
-		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
-		for(i=5;i>=1;i--)
-		{
-			printf(".");
-			Sleep(1000);
-		}
-		main();
-	}
 	retry:
 	printf("\n\n\n\t\t\t\t\t\t\tBus Company");
 	printf("\n\n\t\t\t\t\t\t  Welcome User %s!",username);
@@ -320,7 +348,7 @@ void bus_company_homepage(char username[])
 			main();
 		break;
 		case 5:
-			printf("hello4");
+			
 		break;
 		default:
 			printf("\n\n\t\t\t\t\t\tInvalid Input! Try again");
@@ -332,6 +360,77 @@ void bus_company_homepage(char username[])
 			system("cls");
 			goto retry;
 			
+	}
+}
+
+void change_bus_company(int n)
+{
+	system("cls");
+	FILE *ptr;
+	struct bus_company b,*all=NULL;
+	int count=0,i;
+	char userName[50],unique_code[6],new_pass[50],new_pass2[50];
+	ptr = fopen("bus_company_login.bin","rb");
+	while(fread(&b,sizeof(b),1,ptr))
+	{
+		count++;
+	}
+	all = (struct bus_company*)calloc(count,sizeof(struct bus_company));
+	if(all == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	rewind(ptr);
+	fread(all,sizeof(struct bus_company),count,ptr);
+	fclose(ptr);
+	if(n  ==  0)
+	{
+		main_try_again:
+		fflush(stdin);
+		printf("\n\n\n\n\t\t\t\t\t\t  Enter your username: ");
+		gets(userName);
+		printf("\n\n\t\t\t\t\t\t  Enter your unique pin: ");
+		gets(unique_code);
+		for(i=0;i<count;i++)
+		{
+			if(strcmp(all[i].username,userName)==0&&strcmp(all[i].unique_pin,unique_code)==0)
+			{
+				try_again:
+				fflush(stdin);
+				printf("\n\n\t\t\t\t\t\tEnter your new pass: ");
+				gets(new_pass);
+				printf("\n\n\t\t\t\t\t   Enter your new pass again: ");
+				gets(new_pass2);
+				if(strcmp(new_pass,new_pass2)==0)
+				{
+					strcpy(all[i].pass,new_pass);
+					ptr = fopen("bus_company_login.bin","wb");
+					fwrite(all,sizeof(struct bus_company),count,ptr);
+					fclose(ptr);
+					printf("\n\n\n\t\t\t\t\tPassword changed successfully!");
+					printf("\n\n\n\t\t\t\t\t\tRedirecting");
+					for(i=5;i>=1;i--)
+					{
+						printf(".");
+						Sleep(1000);
+					}
+					bus_company_login();
+				}
+				else
+				{
+					printf("\n\n\n\t\t\t\t    Password didnot match! Try again");
+					goto try_again;
+				}	
+			}
+		}
+		printf("\n\n\t\t\t\t\tIncorrect username or code! Try again");
+		goto main_try_again;
 	}
 }
 
@@ -385,7 +484,7 @@ void driver_login()
 	system("cls");
 	struct driver d;
 	int i,count=0;
-	char userName[50],Pass[50];
+	char userName[50],Pass[50],choice;
 	FILE *ptr;
 	ptr = fopen("driver_login.bin","rb");
 	if(ptr==NULL)
@@ -424,13 +523,38 @@ void driver_login()
 	count++;
 	if(count>=2)
 	{
-		printf("\n\n\t\t\t\t\t\t  Too many attempts!\n\n\t\t\t\t\t\tRedirecting to Home Page");
-		for(i=5;i>=1;i--)
+		ask_forgot_pass:
+		system("cls");
+		printf("\n\n\t\t\t\t\t\t  Too many attempts!\n\n\t\t\t\t\t       Did you forgot your pass?:");
+		printf("\n\n\t\t\t\t\t\t1.Yes [press \'y\' or \'Y\']");
+		printf("\n\n\t\t\t\t\t\t 1.No [press \'n\' or \'N\']");
+		printf("\n\n\n\t\t\t\t\t\t  Enter you choice: ");
+		fflush(stdin);
+		scanf("%c",&choice);
+		if(choice == 'y' || choice == 'Y')
 		{
-			printf(".");
-			Sleep(1000);
+			change_driver(0);
 		}
+		else if(choice == 'n' || choice == 'N')
+		{
+			printf("\n\n\t\t\t\t\t    Redirecting to homepage");
+			for(i=5;i>=1;i--)
+			{
+				printf(".");
+				Sleep(1000);
+			}
 			main();
+		}
+		else
+		{
+			printf("\n\n\t\t\t\t\t\t     Invalid Input\n\t\t\t\t\t\t    Redirecting");
+			for(i=5;i>=1;i--)
+			{
+				printf(".");
+				Sleep(1000);
+			}
+			goto ask_forgot_pass;
+		}
 	}
 	goto reenter;
 }
@@ -489,6 +613,15 @@ void driver_signup()
 	printf("\n\n\t\t\t\t\t  Total experience years: ");
 	scanf("%d",&d.experience);
 	d.recruit_status = 'n';
+	unique:
+	fflush(stdin);
+	printf("\n\n\t\t\tEnter unique pin[equal to 5 characters]: ");
+	gets(d.unique_pin);
+	if(strlen(d.unique_pin)!=5)
+	{
+		printf("\n\n\t\tunique pin must be equals to 5 characters! Try again");
+		goto unique;
+	}
 	fwrite(&d,sizeof(d),1,ptr);
 	fclose(ptr);
 	system("cls");
@@ -575,6 +708,77 @@ void driver_homepage(char username[])
 	}
 }
 
+void change_driver(int n)
+{
+	system("cls");
+	FILE *ptr;
+	struct driver d,*all=NULL;
+	int count=0,i;
+	char userName[50],unique_code[6],new_pass[50],new_pass2[50];
+	ptr = fopen("driver_login.bin","rb");
+	while(fread(&d,sizeof(d),1,ptr))
+	{
+		count++;
+	}
+	all = (struct driver*)calloc(count,sizeof(struct driver));
+	if(all == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	rewind(ptr);
+	fread(all,sizeof(struct driver),count,ptr);
+	fclose(ptr);
+	if(n  ==  0)
+	{
+		main_try_again:
+		fflush(stdin);
+		printf("\n\n\n\n\t\t\t\t\t\t  Enter your username: ");
+		gets(userName);
+		printf("\n\n\t\t\t\t\t\t  Enter your unique pin: ");
+		gets(unique_code);
+		for(i=0;i<count;i++)
+		{
+			if(strcmp(all[i].username,userName)==0&&strcmp(all[i].unique_pin,unique_code)==0)
+			{
+				try_again:
+				fflush(stdin);
+				printf("\n\n\t\t\t\t\t\tEnter your new pass: ");
+				gets(new_pass);
+				printf("\n\n\t\t\t\t\t   Enter your new pass again: ");
+				gets(new_pass2);
+				if(strcmp(new_pass,new_pass2)==0)
+				{
+					strcpy(all[i].pass,new_pass);
+					ptr = fopen("driver_login.bin","wb");
+					fwrite(all,sizeof(struct driver),count,ptr);
+					fclose(ptr);
+					printf("\n\n\n\t\t\t\t\tPassword changed successfully!");
+					printf("\n\n\n\t\t\t\t\t\tRedirecting");
+					for(i=5;i>=1;i--)
+					{
+						printf(".");
+						Sleep(1000);
+					}
+					driver_login();
+				}
+				else
+				{
+					printf("\n\n\n\t\t\t\t    Password didnot match! Try again");
+					goto try_again;
+				}	
+			}
+		}
+		printf("\n\n\t\t\t\t\tIncorrect username or code! Try again");
+		goto main_try_again;
+	}
+}
+
 void user_f()
 {
 	char register_choice,i;
@@ -625,7 +829,7 @@ void user_login()
 	system("cls");
 	struct user u;
 	int i,count=0;
-	char userName[50],Pass[50];
+	char userName[50],Pass[50],choice;
 	FILE *ptr;
 	ptr = fopen("user_login.bin","rb");
 	if(ptr==NULL)
@@ -664,13 +868,38 @@ void user_login()
 	count++;
 	if(count>=2)
 	{
-		printf("\n\n\t\t\t\t\t\t  Too many attempts!\n\n\t\t\t\t\t\tRedirecting to Homepage!");
-		for(i=5;i>=1;i--)
+		ask_forgot_pass:
+		system("cls");
+		printf("\n\n\t\t\t\t\t\t  Too many attempts!\n\n\t\t\t\t\t       Did you forgot your pass?:");
+		printf("\n\n\t\t\t\t\t\t1.Yes [press \'y\' or \'Y\']");
+		printf("\n\n\t\t\t\t\t\t 1.No [press \'n\' or \'N\']");
+		printf("\n\n\n\t\t\t\t\t\t  Enter you choice: ");
+		fflush(stdin);
+		scanf("%c",&choice);
+		if(choice == 'y' || choice == 'Y')
 		{
-			printf(".");
-			Sleep(1000);
+			change_user(0);
 		}
+		else if(choice == 'n' || choice == 'N')
+		{
+			printf("\n\n\t\t\t\t\t    Redirecting to homepage");
+			for(i=5;i>=1;i--)
+			{
+				printf(".");
+				Sleep(1000);
+			}
 			main();
+		}
+		else
+		{
+			printf("\n\n\t\t\t\t\t\t     Invalid Input\n\t\t\t\t\t\t    Redirecting");
+			for(i=5;i>=1;i--)
+			{
+				printf(".");
+				Sleep(1000);
+			}
+			goto ask_forgot_pass;
+		}
 	}
 	goto reenter;
 }
@@ -735,6 +964,15 @@ void user_signup()
 	fflush(stdin);
 	printf("\n\n\t\t\t\t\tEnter your cittizenship number: ");
 	gets(u.citizen_no);
+	unique:
+	fflush(stdin);
+	printf("\n\n\t\t\tEnter unique pin[equal to 5 characters]: ");
+	gets(u.unique_pin);
+	if(strlen(u.unique_pin)!=5)
+	{
+		printf("\n\n\t\tunique pin must be equals to 5 characters! Try again");
+		goto unique;
+	}
 	fwrite(&u,sizeof(u),1,ptr);
 	fclose(ptr);
 	system("cls");
@@ -818,5 +1056,76 @@ void user_homepage(char username[])
 			}
 			system("cls");
 			goto retry;
+	}
+}
+
+void change_user(int n)
+{
+	system("cls");
+	FILE *ptr;
+	struct user u,*all=NULL;
+	int count=0,i;
+	char userName[50],unique_code[6],new_pass[50],new_pass2[50];
+	ptr = fopen("user_login.bin","rb");
+	while(fread(&u,sizeof(u),1,ptr))
+	{
+		count++;
+	}
+	all = (struct user*)calloc(count,sizeof(struct user));
+	if(all == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	rewind(ptr);
+	fread(all,sizeof(struct user),count,ptr);
+	fclose(ptr);
+	if(n  ==  0)
+	{
+		main_try_again:
+		fflush(stdin);
+		printf("\n\n\n\n\t\t\t\t\t\t  Enter your username: ");
+		gets(userName);
+		printf("\n\n\t\t\t\t\t\t  Enter your unique pin: ");
+		gets(unique_code);
+		for(i=0;i<count;i++)
+		{
+			if(strcmp(all[i].username,userName)==0&&strcmp(all[i].unique_pin,unique_code)==0)
+			{
+				try_again:
+				fflush(stdin);
+				printf("\n\n\t\t\t\t\t\tEnter your new pass: ");
+				gets(new_pass);
+				printf("\n\n\t\t\t\t\t   Enter your new pass again: ");
+				gets(new_pass2);
+				if(strcmp(new_pass,new_pass2)==0)
+				{
+					strcpy(all[i].pass,new_pass);
+					ptr = fopen("user_login.bin","wb");
+					fwrite(all,sizeof(struct user),count,ptr);
+					fclose(ptr);
+					printf("\n\n\n\t\t\t\t\t    Password changed successfully!");
+					printf("\n\n\n\t\t\t\t\t\t   Redirecting");
+					for(i=5;i>=1;i--)
+					{
+						printf(".");
+						Sleep(1000);
+					}
+					user_login();
+				}
+				else
+				{
+					printf("\n\n\n\t\t\t\t    Password didnot match! Try again");
+					goto try_again;
+				}	
+			}
+		}
+		printf("\n\n\t\t\t\t\tIncorrect username or code! Try again");
+		goto main_try_again;
 	}
 }
