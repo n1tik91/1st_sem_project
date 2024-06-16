@@ -10,14 +10,17 @@ void bus_company_login();
 void bus_company_signup();
 void bus_company_homepage(char []);
 void change_bus_company(int);
+void bus_company_setting();
 void driver_login();
 void driver_signup();
 void driver_homepage(char []);
 void change_driver(int);
+void driver_setting();
 void user_login();
 void user_signup();
 void user_homepage(char []);
 void change_user(int);
+void user_setting();
 
 struct bus_company
 {
@@ -167,6 +170,7 @@ void bus_company_login()
 	fflush(stdin);
 	printf("\n\n\t\t\t\t\t\tEnter Password: ");
 	gets(Pass);
+	rewind(ptr);
 	while(!feof(ptr))
 	{	
 		fread(&b,sizeof(b),1,ptr);
@@ -348,7 +352,7 @@ void bus_company_homepage(char username[])
 			main();
 		break;
 		case 5:
-			
+			bus_company_setting();
 		break;
 		default:
 			printf("\n\n\t\t\t\t\t\tInvalid Input! Try again");
@@ -434,6 +438,11 @@ void change_bus_company(int n)
 	}
 }
 
+void bus_company_setting()
+{
+	printf("hlo");
+}
+
 void driver_f()
 {
 	char register_choice,i;
@@ -508,6 +517,7 @@ void driver_login()
 	fflush(stdin);
 	printf("\n\n\t\t\t\t\t\tEnter Password: ");
 	gets(Pass);
+	rewind(ptr);
 	while(!feof(ptr))
 	{	
 		fread(&d,sizeof(d),1,ptr);
@@ -853,6 +863,7 @@ void user_login()
 	fflush(stdin);
 	printf("\n\n\t\t\t\t\t\tEnter Password: ");
 	gets(Pass);
+	rewind(ptr);
 	while(!feof(ptr))
 	{	
 		fread(&u,sizeof(u),1,ptr);
