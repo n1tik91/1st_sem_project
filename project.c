@@ -25,6 +25,8 @@ void change_user(int);
 void user_setting(char []);
 void bus_list(char []);
 void travelling_fare(char []);
+void user_report(char []);
+void check_report(char []);
 
 struct bus_company
 {
@@ -56,6 +58,13 @@ struct user
 	int age;
 	char citizen_no[20];
 	char unique_pin[10];
+};
+
+struct report
+{
+	char name[100];
+	char bus[100];
+	char reprt[300];
 };
 
 int main()
@@ -371,7 +380,7 @@ void bus_company_homepage(char username[])
 	printf("\n\n\t\t\t\t\t\t\t  Features");
 	printf("\n\n\n\t  1.Recruit Driver");
 	printf("\t\t\t\t2.Increase Buses");
-	printf("\t\t\t   3. Active Buses");
+	printf("\t\t\t   3.See Report");
 	printf("\n\t     [Press 1]");
 	printf("\t\t\t\t\t  [Press 2]");
 	printf("\t\t\t\t     [Press 3]");
@@ -392,7 +401,7 @@ void bus_company_homepage(char username[])
 			printf("hello2");
 		break;
 		case 3:
-			printf("hello3");
+			check_report(username);
 		break;
 		case 4:
 			system("cls");
@@ -753,6 +762,119 @@ void bus_company_setting(char username[])
 			system("cls");
 			goto retry;		
 	}
+}
+
+void check_report(char username[])
+{
+	int i,count=0,counter=0,choice,j,quit;
+	struct bus_company b;
+	struct report r;
+	struct user u;
+	FILE *ptr_report,*ptr_bus,*ptr_user,*ptr_temp;
+	ptr_user = fopen("user_login.bin","rb");
+	if(ptr_user == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_temp = fopen("temp_report.bin","wb+");
+	if(ptr_temp == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_bus = fopen("bus_company_login.bin","rb");
+	if(ptr_bus == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_report = fopen("user_report.bin","rb");
+	if(ptr_report == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	system("cls");
+	printf("\n\n\n\t\t\t\t\t\t\tBus Company");
+	printf("\n\n\t\t\t\t\t\t     User %s!",username);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	printf("\n\n\n\t\t\t\t\t\tList of Reports are:");
+	while(fread(&r,sizeof(r),1,ptr_report))
+	{
+		count++;
+		if(strcmp(username,r.bus)==0)
+		{
+			counter++;
+			fwrite(&r,sizeof(r),1,ptr_temp);
+			printf("\n\n\t\t\t\t%d %s",counter,r.reprt);
+			printf("\n\t\t\t\t[By : %s]",r.name);
+		}
+	}
+	printf("\n\n\t\t\t\t%d  <-- back",counter+1,r.reprt);
+	printf("\n\n\n\t\t\t\t\tSelect user to view their details: ");
+	fflush(stdin);
+	scanf("%d",&choice);
+	if(choice == counter+1)
+	{
+		bus_company_homepage(username);
+	}
+	else if(choice<0||choice>counter)
+	{
+		printf("\n\n\t\t\t\t\t Incorrect option! Try Again");
+		for(j=3;j>=1;j--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		check_report(username);
+	}
+	rewind(ptr_report);
+	rewind(ptr_temp);
+	for(i=0;i<counter;i++)
+	{
+		fread(&r,sizeof(r),1,ptr_temp);
+		if(i+1==choice)
+		{
+			while(fread(&u,sizeof(u),1,ptr_user))
+			{
+				if(strcmp(u.real_name,r.name)==0)
+				{
+					system("cls");
+					printf("\n\n\n\t\t\t\t\t   Details of reporter are: ");
+					printf("\n\n\t\t\t\t\t\tName: %s",u.real_name);
+					printf("\n\n\t\t\t\t\t\tUser name: %s",u.username);
+					printf("\n\n\t\t\t\t\t\tAge: %d",u.age);
+					break;
+				}
+			}
+		}
+	}
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	printf("\n\n\t\t\t\t\t   Enter any thing to go back: ");
+	fflush(stdin);
+	scanf("%c",&quit);
+	check_report(username);
 }
 
 void driver_f()
@@ -1713,7 +1835,7 @@ void user_homepage(char username[])
 			travelling_fare(username);
 		break;
 		case 3:
-			printf("hello3");
+			user_report(username);
 		break;
 		case 4:
 			system("cls");
@@ -2305,4 +2427,98 @@ void travelling_fare(char username[])
 		Sleep(1000);
 	}
 	travelling_fare(username);
+}
+
+void user_report(char username[])
+{
+	struct report r;
+	struct user u;
+	struct bus_company b,*all=NULL;
+	int count=0,user_detect,i,bus_no,j,quit;
+	FILE *ptr_report,*ptr_user,*ptr_bus;
+	ptr_user = fopen("user_login.bin","rb");
+	if(ptr_user == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_bus = fopen("bus_company_login.bin","rb");
+	if(ptr_bus == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_report = fopen("user_report.bin","ab+");
+	if(ptr_report == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	system("cls");
+	printf("\n\n\n\t\t\t\t\t\t\tUser\'s Hub");
+	printf("\n\n\t\t\t\t\t\tWelcome User %s!",username);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	printf("\n\n\t\t\t\t\t\t    Report Section");
+	printf("\n\n\n\t\t\t\t\tChoose the company to want to report to!");
+	while(fread(&b,sizeof(b),1,ptr_bus))
+	{
+		printf("\n\n\t\t\t\t\t    %d %s [%d buses]",count+1,b.name,b.bus_number);
+		count++;
+	}
+	printf("\n\n\n\t\t\t\t      Enter number above to report: ");
+	scanf("%d",&bus_no);
+	if(bus_no<1||bus_no>count)
+	{
+		printf("\n\n\t\t\t\t\t Incorrect option! Try Again");
+		for(j=3;j>=1;j--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		user_report(username);
+	}
+	rewind(ptr_bus);
+	for(i=0;i<count;i++)
+	{
+		fread(&b,sizeof(b),1,ptr_bus);
+		if(i+1==bus_no)
+		{
+			strcpy(r.bus,b.username);
+			break;
+		}
+	}
+	printf("\n\n\t\t\t\t\t     Enter your report here:\n\n\t\t");
+	fflush(stdin);
+	gets(r.reprt);
+	while(fread(&u,sizeof(u),1,ptr_user))
+	{
+		if(strcmp(u.username,username)==0)
+		{
+			strcpy(r.name,u.real_name);
+		}
+	}
+	fwrite(&r,sizeof(r),1,ptr_report);
+	fclose(ptr_user);
+	fclose(ptr_report);
+	fclose(ptr_bus);
+	printf("\n\n\t\t\t\t\t\tReported Successfully!");
+	printf("\n\n\t\t\t\t\tEnter any thing to go to homepage: ");
+	fflush(stdin);
+	scanf("%c",&quit);
+	user_homepage(username);
 }
