@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<conio.h>
+#include<math.h>
 
 void bus_company_f();
 void driver_f();
@@ -22,6 +23,8 @@ void user_signup();
 void user_homepage(char []);
 void change_user(int);
 void user_setting(char []);
+void bus_list(char []);
+void travelling_fare(char []);
 
 struct bus_company
 {
@@ -422,7 +425,7 @@ void change_bus_company(int n)
 	system("cls");
 	FILE *ptr;
 	struct bus_company b,*all=NULL;
-	int count=0,i,flag=0,error_count=0,j;
+	int count=0,i,flag=0,error_count=0,j,file_count;
 	char userName[50],unique_code[6],new_pass[50],new_pass2[50],ch,Pass[50],new_username[50],new_companyname[50];
 	ptr = fopen("bus_company_login.bin","rb");
 	while(fread(&b,sizeof(b),1,ptr))
@@ -451,9 +454,9 @@ void change_bus_company(int n)
 		gets(userName);
 		printf("\n\n\t\t\t\t\t\t  Enter your unique pin: ");
 		gets(unique_code);
-		for(i=0;i<count;i++)
+		for(file_count=0;file_count<count;file_count++)
 		{
-			if(strcmp(all[i].username,userName)==0&&strcmp(all[i].unique_pin,unique_code)==0)
+			if(strcmp(all[file_count].username,userName)==0&&strcmp(all[file_count].unique_pin,unique_code)==0)
 			{
 				try_again:
 				fflush(stdin);
@@ -509,7 +512,7 @@ void change_bus_company(int n)
 				}
 				if(strcmp(new_pass,new_pass2)==0)
 				{
-					strcpy(all[i].pass,new_pass);
+					strcpy(all[file_count].pass,new_pass);
 					ptr = fopen("bus_company_login.bin","wb");
 					fwrite(all,sizeof(struct bus_company),count,ptr);
 					fclose(ptr);
@@ -1080,7 +1083,7 @@ void change_driver(int n)
 	system("cls");
 	FILE *ptr;
 	struct driver d,*all=NULL;
-	int count=0,i,flag=0,error_count=0,j;
+	int count=0,i,flag=0,error_count=0,j,file_count;
 	char userName[50],unique_code[6],new_pass[50],new_pass2[50],ch,Pass[50],new_username[50],new_name[50];;
 	ptr = fopen("driver_login.bin","rb");
 	while(fread(&d,sizeof(d),1,ptr))
@@ -1109,9 +1112,9 @@ void change_driver(int n)
 		gets(userName);
 		printf("\n\n\t\t\t\t\t\t  Enter your unique pin: ");
 		gets(unique_code);
-		for(i=0;i<count;i++)
+		for(file_count=0;file_count<count;file_count++)
 		{
-			if(strcmp(all[i].username,userName)==0&&strcmp(all[i].unique_pin,unique_code)==0)
+			if(strcmp(all[file_count].username,userName)==0&&strcmp(all[file_count].unique_pin,unique_code)==0)
 			{
 				try_again:
 				fflush(stdin);
@@ -1167,7 +1170,7 @@ void change_driver(int n)
 				}
 				if(strcmp(new_pass,new_pass2)==0)
 				{
-					strcpy(all[i].pass,new_pass);
+					strcpy(all[file_count].pass,new_pass);
 					ptr = fopen("driver_login.bin","wb");
 					fwrite(all,sizeof(struct driver),count,ptr);
 					fclose(ptr);
@@ -1519,7 +1522,7 @@ void user_login()
 			}	
 		}	
 	}
-	printf("\t\t\t\t\t  incorrect id or password! enter again");
+	printf("\n\n\t\t\t\t\t  incorrect id or password! enter again");
 	count++;
 	if(count>=2)
 	{
@@ -1704,10 +1707,10 @@ void user_homepage(char username[])
 	switch (user_choice)
 	{
 		case 1:
-			printf("hello1");
+			bus_list(username);
 		break;
 		case 2:
-			printf("hello2");
+			travelling_fare(username);
 		break;
 		case 3:
 			printf("hello3");
@@ -1742,7 +1745,7 @@ void change_user(int n)
 	system("cls");
 	FILE *ptr;
 	struct user u,*all=NULL;
-	int count=0,i,flag=0,error_count=0,j;
+	int count=0,i,flag=0,error_count=0,j,file_count;
 	char userName[50],unique_code[6],new_pass[50],new_pass2[50],ch,Pass[50],new_username[50],new_name[50];;
 	ptr = fopen("user_login.bin","rb");
 	while(fread(&u,sizeof(u),1,ptr))
@@ -1771,9 +1774,9 @@ void change_user(int n)
 		gets(userName);
 		printf("\n\n\t\t\t\t\t\t  Enter your unique pin: ");
 		gets(unique_code);
-		for(i=0;i<count;i++)
+		for(file_count=0;file_count<count;file_count++)
 		{
-			if(strcmp(all[i].username,userName)==0&&strcmp(all[i].unique_pin,unique_code)==0)
+			if(strcmp(all[file_count].username,userName)==0&&strcmp(all[file_count].unique_pin,unique_code)==0)
 			{
 				try_again:
 				fflush(stdin);
@@ -1829,12 +1832,12 @@ void change_user(int n)
 				}
 				if(strcmp(new_pass,new_pass2)==0)
 				{
-					strcpy(all[i].pass,new_pass);
+					strcpy(all[file_count].pass,new_pass);
 					ptr = fopen("user_login.bin","wb");
 					fwrite(all,sizeof(struct user),count,ptr);
 					fclose(ptr);
-					printf("\n\n\n\t\t\t\t\t      Password changed successfully!");
-					printf("\n\n\n\t\t\t\t\t\t     Redirecting");
+					printf("\n\n\n\t\t\t\t\tPassword changed successfully!");
+					printf("\n\n\n\t\t\t\t\t\tRedirecting");
 					for(i=5;i>=1;i--)
 					{
 						printf(".");
@@ -2070,4 +2073,236 @@ void user_setting(char username[])
 			system("cls");
 			goto retry;		
 	}
+}
+
+void bus_list(char username[])
+{
+	system("cls");
+	int count=0,i,choice,j,one_choice;
+	FILE *ptr;
+	struct bus_company b,*all = NULL;
+	ptr = fopen("bus_company_login.bin","rb");
+	if(ptr == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	printf("\n\n\n\t\t\t\t\t\t\tUser\'s Hub");
+	printf("\n\n\t\t\t\t\t\tWelcome User %s!",username);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	printf("\n\n\t\t\t\t\t       List of active bus company");
+	while(fread(&b,sizeof(b),1,ptr))
+	{
+		printf("\n\n\t\t\t\t\t    %d %s [%d buses]",count+1,b.name,b.bus_number);
+		count++;
+	}
+	printf("\n\n\t\t\t\t\t    %d <--back",count+1);
+	rewind(ptr);
+	all = (struct bus_company*)calloc(count,sizeof(struct bus_company));
+	fread(all,sizeof(struct bus_company),count,ptr);
+	printf("\n\n\n\t\t\t\t   Enter number above to see the route: ");
+	fflush(stdin);
+	scanf("%d",&choice);
+	if(choice == count+1)
+	{
+		user_homepage(username);
+	}
+	for(i=0;i<count;i++)
+	{
+		if(i+1==choice)
+		{
+			system("cls");
+			printf("\n\n\t\t\t\t\t    The route of %s are:",all[i].name);
+			for(j=0;j<3;j++)
+			{
+				printf("\n\n\t\t\t\t\t\t\t%d %s",j+1,all[i].destinations[j]);
+			}
+			printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+			printf("\n\n\t\t\t\t\t\t\tOptions:");
+			printf("\n\n\t\t\t\t\t\t  1. Bus Fair Calculate");
+			printf("\n\n\t\t\t\t\t\t     2. <--Back");
+			printf("\n\n\n\t\t\t\t\tEnter your choice: ");
+			fflush(stdin);
+			scanf("%d",&one_choice);
+			if(one_choice == 1)
+			{ 
+				travelling_fare(username);
+			}
+			else if(one_choice == 2)
+			{
+				bus_list(username);
+			}
+			else
+			{
+				printf("\n\n\t\t\t\t\t\t    Incorrect Input!");
+				printf("\n\n\t\t\t\t\t\t     Redirecting");
+				for(j=5;j>=1;j--)
+				{
+					printf(".");
+					Sleep(1000);
+				}
+				bus_list(username);
+			}
+		}	
+	}
+	printf("\n\n\t\t\t\t\t    Incorrect option! Try Again");
+	for(j=3;j>=1;j--)
+	{
+		printf(".");
+		Sleep(1000);
+	}
+	bus_list(username);
+}
+
+void travelling_fare(char username[])
+{
+	system("cls");
+	int i,j,count=0,choice,p_location,d_location;
+	float fare,discount;
+	char exit_choice,quit;
+	struct bus_company b, *all_bus = NULL;
+	struct user u, *all_user = NULL;
+	FILE *bus_ptr,*user_ptr;
+	bus_ptr = fopen("bus_company_login.bin","rb");
+	if(bus_ptr == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	user_ptr = fopen("user_login.bin","rb");
+	if(user_ptr == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	printf("\n\n\n\t\t\t\t\t\t\tUser\'s Hub");
+	printf("\n\n\t\t\t\t\t\tWelcome User %s!",username);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	printf("\n\n\t\t\t\t\t\tTravelling Fare Calculator");
+	printf("\n\n\t\t\t\t\t       List of active bus company");
+	while(fread(&b,sizeof(b),1,bus_ptr))
+	{
+		printf("\n\n\t\t\t\t\t    %d %s [%d buses]",count+1,b.name,b.bus_number);
+		count++;
+	}
+	printf("\n\n\t\t\t\t\t    %d <--back",count+1);
+	rewind(bus_ptr);
+	all_bus = (struct bus_company*)calloc(count,sizeof(struct bus_company));
+	fread(all_bus,sizeof(struct bus_company),count,bus_ptr);
+	printf("\n\n\t\t\t\t    Note: Bus fare can only be calculated for the same bus!");
+	printf("\n\n\n\t\t\t\t   Enter number above to calculate fare: ");
+	fflush(stdin);
+	scanf("%d",&choice);
+	if(choice == count+1)
+	{
+		user_homepage(username);
+	}
+	for(i=0;i<count;i++)
+	{
+		if(i+1 == choice)
+		{
+			system("cls");
+			printf("\n\n\t\t\t\t\t    The route of %s are:",all_bus[i].name);
+			for(j=0;j<3;j++)
+			{
+				printf("\n\n\t\t\t\t\t\t\t%d %s",j+1,all_bus[i].destinations[j]);
+			}
+			printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+			retry:
+			printf("\n\n\n\t\t\t     Choose your pickup location[in number]: ");
+			scanf("%d",&p_location);
+			printf("\n\n\n\t\t\t     Choose your destination[in number]: ");
+			scanf("%d",&d_location);
+			if(p_location == d_location)
+			{
+				printf("\n\n\t\t\t\t    Error! You cannot have same pickup and destination.");
+				goto retry;
+			}
+			else if((p_location<1||p_location>3)||(d_location<1||d_location>3))
+			{
+				try_again:
+				system("cls");
+				printf("\n\n\t\t\t\t\t    Incorrect option! Do you want to exit?");
+				printf("\n\n\n\t\t\t\t\t\t\t    Yes\n\t\t\t\t\t\t    [Press 'y' or 'Y']");
+				printf("\n\n\n\t\t\t\t\t\t\t     No\n\t\t\t\t\t\t    [Press 'n' or 'N']");
+				printf("\n\n\n\t\t\t\t\tEnter your choice: ");
+				fflush(stdin);
+				scanf("%c",&exit_choice);
+				if(exit_choice == 'y' || exit_choice == 'Y')
+				{
+					user_homepage(username);
+				}
+				else if(exit_choice == 'n' || exit_choice == 'N')
+				{
+					travelling_fare(username);
+				}
+				else
+				{
+					printf("\n\n\t\t\t\t\t    Incorrect option! Try Again");
+					for(j=3;j>=1;j--)
+					{
+						printf(".");
+						Sleep(1000);
+					}
+					goto try_again;
+				}
+			}
+			if(abs(p_location-d_location)==1)
+			{
+				fare = 20.0;
+			}
+			else if(abs(p_location-d_location)==2)
+			{
+				fare = 30.0;
+			}
+			while(fread(&u,sizeof(u),1,user_ptr))
+			{
+				if(strcmp(u.username,username)==0)
+				{
+					if(u.age<=22||u.age>=65)
+					{
+						discount = (45.0/100)*fare;
+						fare = fare - discount;
+						break;
+					}
+				}
+			}
+			system("cls");
+			printf("\n\n\n\t\t\t\t\t\t\tUser\'s Hub");
+			printf("\n\n\t\t\t\t\t\tWelcome User %s!",username);
+			printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+			printf("\n\n\t\t\t\t\t\tTravelling Fare Calculator");
+			printf("\n\n\n\n\t\t\t\t\t      Your total Fare is: %.2f",fare);
+			if(discount > 0)
+			{
+				printf("\n\n\t\t\t\t\t     Your total discount is: %.2f",discount);
+			}
+			printf("\n\n\t\t\t\t\t\t Enter any thing to go to homepage: ");
+			fflush(stdin);
+			scanf("%c",&quit);
+			user_homepage(username);
+		}
+	}
+	printf("\n\n\t\t\t\t\t    Incorrect option! Try Again");
+	for(j=3;j>=1;j--)
+	{
+		printf(".");
+		Sleep(1000);
+	}
+	travelling_fare(username);
 }
