@@ -27,6 +27,9 @@ void bus_list(char []);
 void travelling_fare(char []);
 void user_report(char []);
 void check_report(char []);
+void increase_bus(char []);
+void job_apply(char []);
+void recruit_driver(char []);
 
 struct bus_company
 {
@@ -47,6 +50,7 @@ struct driver
 	int experience;
 	char recruit_status;
 	char unique_pin[10];
+	char affiliated_company[50];
 };
 
 struct user
@@ -65,6 +69,12 @@ struct report
 	char name[100];
 	char bus[100];
 	char reprt[300];
+};
+
+struct job_application
+{
+	char company_name[50];
+	char employee_name[50];
 };
 
 int main()
@@ -395,10 +405,10 @@ void bus_company_homepage(char username[])
 	switch (user_choice)
 	{
 		case 1:
-			printf("hello1");
+			recruit_driver(username);
 		break;
 		case 2:
-			printf("hello2");
+			increase_bus(username);
 		break;
 		case 3:
 			check_report(username);
@@ -877,6 +887,165 @@ void check_report(char username[])
 	check_report(username);
 }
 
+void increase_bus(char username[])
+{
+	int i,change,choice,bus_number,original_bus_number,quit,count=0;;
+	struct bus_company b;
+	FILE *ptr;
+	ptr = fopen("bus_company_login.bin","rb");
+	if(ptr == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	system("cls");
+	printf("\n\n\n\t\t\t\t\t\t\tBus Company");
+	printf("\n\n\t\t\t\t\t\t     User %s!",username);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	while(fread(&b,sizeof(b),1,ptr))
+	{
+		count++;
+		if(strcmp(b.username,username)==0)
+		{
+			printf("\n\n\t\t\t\t\t\tTotal number of buses is: %d",b.bus_number);
+			original_bus_number = b.bus_number;
+		}
+	}
+	retry:
+	printf("\n\n\t\t\t\t\t\t\tOptions:");
+	printf("\n\n\t\t\t\t\t\t\t1. Increase");
+	printf("\n\n\t\t\t\t\t\t\t2. Decrease");
+	printf("\n\n\t\t\t\t\t\t\t3. <-- Back");
+	printf("\n\n\t\t\t\t\t\t  Enter your choice: ");
+	fflush(stdin);
+	scanf("%d",&choice);
+	if(choice == 1)
+	{
+		printf("\n\n\t\t\t\t     Enter the number of bus you want to increase: ");
+		scanf("%d",&bus_number);
+		if(bus_number>20||bus_number<1)
+		{
+			printf("\n\n\t\t\t\t\tError! Upto 20 buses can be increase at a time");
+			increase_bus(username);
+		}
+		bus_number += original_bus_number;
+		
+	}
+	else if(choice == 2)
+	{
+		printf("\n\n\t\t\t\t     Enter the number of bus you want to desrease: ");
+		scanf("%d",&bus_number);
+		if(bus_number>20||bus_number<1)
+		{
+			printf("\n\n\t\t\t\t\tError! Upto 20 buses can be desrease at a time");
+			goto retry;
+		}
+		if(original_bus_number - bus_number < 0)
+		{
+			printf("\n\n\t\t\t\t\tError! Bus number cannot be less than zero!");
+			goto retry;
+		}
+		bus_number = original_bus_number - bus_number;
+	}
+	else if(choice == 3)
+	{
+		bus_company_homepage(username);
+	}
+	else
+	{
+		printf("\n\n\t\t\t\t\tError! Incorrect Option. Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		goto retry;
+	}
+	struct bus_company all[count];
+	rewind(ptr);
+	fread(&all,sizeof(struct bus_company),count,ptr);
+	ptr = fopen("bus_company_login.bin","wb");
+	if(ptr == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	for(i=0;i<count;i++)
+	{
+		if(strcmp(all[i].username,username)==0)
+		{
+			all[i].bus_number = bus_number;
+			printf("\n\n\t\t\t\t\tChanged total number of buses is: %d",all[i].bus_number);
+		}
+	}
+	fwrite(&all,sizeof(struct bus_company),count,ptr);
+	fclose(ptr);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	printf("\n\n\t\t\t\t\t   Enter any thing to go back: ");
+	fflush(stdin);
+	scanf("%c",&quit);
+	bus_company_homepage(username);
+}
+
+void recruit_driver(char username[])
+{
+	int i,count=0,count_2=0;
+	FILE *ptr_job,*ptr_driver;
+	struct job_application j;
+	struct driver d;
+	ptr_job = fopen("job_application.bin","ab+");
+	if(ptr_job == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_driver = fopen("driver_login.bin","rb");
+	if(ptr_driver == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	system("cls");
+	printf("\n\n\n\t\t\t\t\t\t\tBus Company");
+	printf("\n\n\t\t\t\t\t\t     User %s!",username);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	printf("\n\n\t\t\t\t\t\tList of Job Applications are:");
+	while(fread(&j,sizeof(j),1,ptr_job))
+	{
+		count++;
+		if(strcmp(j.company_name,username)==0)
+		{
+			count_2++;
+			printf("\n\n\t\t\t\t\t\t%d %s",count_2,j.employee_name);
+		}
+	}
+	for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+}
+
 void driver_f()
 {
 	char register_choice,i;
@@ -1105,6 +1274,7 @@ void driver_signup()
 	printf("\n\n\t\t\t\t\t  Total experience years: ");
 	scanf("%d",&d.experience);
 	d.recruit_status = 'n';
+	strcpy(d.affiliated_company,"n");
 	unique:
 	fflush(stdin);
 	printf("\n\n\t\t\tEnter unique pin[equal to 5 characters]: ");
@@ -1167,7 +1337,7 @@ void driver_homepage(char username[])
 	switch (user_choice)
 	{
 		case 1:
-			printf("hello1");
+			job_apply(username);
 		break;
 		case 2:
 			printf("hello2");
@@ -1533,6 +1703,277 @@ void driver_setting(char username[])
 			system("cls");
 			goto retry;		
 	}
+}
+
+void job_apply(char username[])
+{
+	int i,k,recruit_choice,count=0,choice,user_choice,count_driver=0;
+	char quit;
+	struct bus_company b;
+	struct driver d,d2;
+	struct job_application j;
+	FILE *ptr_driver,*ptr_company,*ptr_job;
+	ptr_driver = fopen("driver_login.bin","rb");
+	if(ptr_driver == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_company = fopen("bus_company_login.bin","rb");
+	if(ptr_company == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_job = fopen("job_application.bin","ab+");
+	if(ptr_job == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	system("cls");
+	printf("\n\n\n\t\t\t\t\t\t\tDriver\'s Hub");
+	printf("\n\n\t\t\t\t\t\t  Welcome User %s!",username);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	while(!feof(ptr_driver))
+	{
+		fread(&d,sizeof(d),1,ptr_driver);
+		if(strcmp(d.username,username)==0)
+		{
+			if(d.recruit_status=='y')
+			{
+				printf("\n\n\t\t\t\t\t\tYou are already hired by %s.",d.affiliated_company);
+				printf("\n\n\t\t\t\t\t\tOptions:");
+				printf("\n\n\t\t\t\t\t     1. Leave Job");
+				printf("\n\n\t\t\t\t\t     2. <-- Back");
+				printf("\n\n\t\t\t\t\tEnter your choice: ");
+				scanf("%d",&recruit_choice);
+				if(recruit_choice == 1)
+				{
+					printf("\n\n\t\t\t\t\t\tList of company to apply for job:");
+					while(fread(&b,sizeof(b),1,ptr_company))
+					{
+						count++;
+						printf("\n\n\t\t\t\t\t\t%d %s",count,b.name);
+					}
+					rewind(ptr_driver);
+					while(!feof(ptr_driver))
+					{
+						fread(&d2,sizeof(d2),1,ptr_driver);
+						count_driver++;
+					}
+					struct driver all[count_driver];
+					rewind(ptr_company);
+					rewind(ptr_driver);
+					fread(&all,sizeof(struct driver),count,ptr_driver);
+					fclose(ptr_driver);
+					printf("\n\n\t\t\t\t\t\tEnter your choice:");
+					scanf("%d",&choice);
+					if(choice<0||choice>count)
+					{
+						printf("\n\n\t\t\t\t\t\tInvalid Input! Try again");
+						for(i=5;i>=1;i--)
+						{
+							printf(".");
+							Sleep(1000);
+						}
+						job_apply(username);
+					}
+					for(i=0;i<count;i++)
+					{
+						fread(&b,sizeof(b),1,ptr_company);
+						if(i+1==choice)
+						{
+							system("cls");
+							printf("\n\n\n\t\t\t\t\t\t\tDriver\'s Hub");
+							printf("\n\n\t\t\t\t\t\t  Welcome User %s!",username);
+							printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+							printf("\n\n\t\t\t\t\t      Details of %s",b.name);
+							printf("\n\n\t\t\t\t\t\t Bus number = %d",b.bus_number);
+							printf("\n\n\t\t\t\t\t\t Destination 1: %s",b.destinations[0]);
+							printf("\n\n\t\t\t\t\t\t Destination 2: %s",b.destinations[1]);
+							printf("\n\n\t\t\t\t\t\t Destination 3: %s",b.destinations[2]);
+							printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+							printf("\n\n\t\t\t\t\t\t\tOptions:");
+							printf("\n\n\t1. Apply for Job \t\t\t\t\t\t\t\t\t2.Exit");
+							printf("\n\n\t\t\t\t\t\tEnter your choice:");
+							fflush(stdin);
+							scanf("%d",&user_choice);
+							if(user_choice == 1)
+							{
+								strcpy(j.employee_name,username);
+								strcpy(j.company_name,b.username);
+								fwrite(&j,sizeof(j),1,ptr_job);
+								fclose(ptr_job);
+								for(k=0;k<count_driver;k++)
+								{
+									if(strcmp(all[k].username,username)==0)
+									{
+										all[k].recruit_status = 'e';
+									}
+								}
+								ptr_driver = fopen("driver_login.bin","wb");
+								fwrite(&all,sizeof(struct driver),count,ptr_driver);
+								fclose(ptr_driver);
+								system("cls");
+								printf("\n\n\t\t\t\t\t\tApplied Successfully!");
+								printf("\n\n\t\t\t\t\t\t\tRedirecting");
+								for(i=5;i>=1;i--)
+								{
+									printf(".");
+									Sleep(1000);
+								}
+								driver_homepage(username);
+								break;
+							}
+						}
+					}
+					break;
+				}
+				else if(recruit_choice == 2)
+				{
+					driver_homepage(username);
+				}
+				else
+				{
+					printf("\n\n\t\t\t\t\t\tInvalid Input! Try again");
+					for(i=5;i>=1;i--)
+					{
+						printf(".");
+						Sleep(1000);
+					}
+					job_apply(username);
+				}
+			}
+			else if(d.recruit_status=='e')
+			{
+				system("cls");
+				printf("\n\n\n\t\t\t\t\tYou are in process of hiring. Please wait!");
+				printf("\n\n\t\t\t\t\tEnter any thing to go to homepage: ");
+				fflush(stdin);
+				scanf("%c",&quit);
+				driver_homepage(username);
+			}
+			else if(d.recruit_status=='n')
+			{
+				printf("\n\n\t\t\t\t\t\tList of company to apply for job:");
+				while(fread(&b,sizeof(b),1,ptr_company))
+				{
+					count++;
+					printf("\n\n\t\t\t\t\t\t%d %s",count,b.name);
+				}
+				rewind(ptr_driver);
+				while(!feof(ptr_driver))
+				{
+					fread(&d2,sizeof(d2),1,ptr_driver);
+					count_driver++;
+				}
+				struct driver all[count_driver];
+				rewind(ptr_company);
+				rewind(ptr_driver);
+				fread(&all,sizeof(struct driver),count,ptr_driver);
+				fclose(ptr_driver);
+				printf("\n\n\t\t\t\t\t\tEnter your choice:");
+				scanf("%d",&choice);
+				if(choice<0||choice>count)
+				{
+					printf("\n\n\t\t\t\t\t\tInvalid Input! Try again");
+					for(i=5;i>=1;i--)
+					{
+						printf(".");
+						Sleep(1000);
+					}
+					job_apply(username);	
+				}
+				for(i=0;i<count;i++)
+				{
+					fread(&b,sizeof(b),1,ptr_company);
+					if(i+1==choice)
+					{
+						system("cls");
+						printf("\n\n\n\t\t\t\t\t\t\tDriver\'s Hub");
+						printf("\n\n\t\t\t\t\t\t  Welcome User %s!",username);
+						printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+						printf("\n\n\t\t\t\t\t      Details of %s",b.name);
+						printf("\n\n\t\t\t\t\t\t Bus number = %d",b.bus_number);
+						printf("\n\n\t\t\t\t\t\t Destination 1: %s",b.destinations[0]);
+						printf("\n\n\t\t\t\t\t\t Destination 2: %s",b.destinations[1]);
+						printf("\n\n\t\t\t\t\t\t Destination 3: %s",b.destinations[2]);
+						printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+						printf("\n\n\t\t\t\t\t\t\tOptions:");
+						printf("\n\n\t1. Apply for Job \t\t\t\t\t\t\t\t\t2.Exit");
+						printf("\n\n\t\t\t\t\t\tEnter your choice:");
+						fflush(stdin);
+						scanf("%d",&user_choice);
+						if(user_choice == 1)
+						{
+							strcpy(j.employee_name,username);
+							strcpy(j.company_name,b.username);
+							fwrite(&j,sizeof(j),1,ptr_job);
+							fclose(ptr_job);
+							for(k=0;k<count_driver;k++)
+							{
+								if(strcmp(all[k].username,username)==0)
+								{
+									all[k].recruit_status = 'e';
+									break;
+								}
+							}
+							printf("%c",all[k].recruit_status);
+							ptr_driver = fopen("driver_login.bin","wb");
+							fwrite(&all,sizeof(struct driver),count,ptr_driver);
+							fclose(ptr_driver);
+							system("cls");
+							printf("\n\n\t\t\t\t\t\tApplied Successfully!");
+							printf("\n\n\t\t\t\t\t\t\tRedirecting");
+							for(i=5;i>=1;i--)
+							{
+								printf(".");
+								Sleep(1000);
+							}
+							driver_homepage(username);
+							break;
+						}
+						else if(user_choice == 2)
+						{
+							driver_homepage(username);
+						}
+						else
+						{
+							printf("\n\n\t\t\t\t\t\tInvalid input! Try Again");
+							for(i=5;i>=1;i--)
+							{
+								printf(".");
+								Sleep(1000);
+							}
+							job_apply(username);
+						}
+					}
+				}
+				break;
+			}
+		}
+	}
+	for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
 }
 
 void user_f()
