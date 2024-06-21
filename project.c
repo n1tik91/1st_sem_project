@@ -999,12 +999,23 @@ void increase_bus(char username[])
 
 void recruit_driver(char username[])
 {
-	int i,count=0,count_2=0;
-	FILE *ptr_job,*ptr_driver;
+	int i,count=0,choice,count_2=0,k;
+	FILE *ptr_job,*ptr_driver,*ptr_temp;
 	struct job_application j;
 	struct driver d;
 	ptr_job = fopen("job_application.bin","ab+");
 	if(ptr_job == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		main();
+	}
+	ptr_temp = fopen("temp_job.bin","wb+");
+	if(ptr_temp == NULL)
 	{
 		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
 		for(i=5;i>=1;i--)
@@ -1032,11 +1043,43 @@ void recruit_driver(char username[])
 	printf("\n\n\t\t\t\t\t\tList of Job Applications are:");
 	while(fread(&j,sizeof(j),1,ptr_job))
 	{
-		count++;
 		if(strcmp(j.company_name,username)==0)
 		{
-			count_2++;
-			printf("\n\n\t\t\t\t\t\t%d %s",count_2,j.employee_name);
+			count++;
+			printf("\n\n\t\t\t\t\t\t%d. %s",count,j.employee_name);
+			fwrite(&j,sizeof(j),1,ptr_temp);
+		}
+	}
+	while(fread(&d,sizeof(d),1,ptr_driver))
+	{
+		count_2++;
+	}
+	rewind(ptr_driver);
+	struct driver all[count_2];
+	fread(&all,sizeof(struct driver),count_2,ptr_driver);
+	fclose(ptr_driver);
+	rewind(ptr_temp);
+	rewind(ptr_job);
+	printf("\n\n\t\t\t\t\t    Choose the driver you want to recruit: ");
+	fflush(stdin);
+	scanf("%d",&choice);
+	rewind(ptr_job);
+	for(i=0;i<count;i++)
+	{
+		fread(&j,sizeof(j),1,ptr_temp);
+		if(i+1==choice)
+		{
+			for(k=0;k<count_2;k++)
+			{
+				if(strcmp(all[k].username,j.employee_name)==0)
+				{
+					all[k].recruit_status='y';
+					ptr_driver = fopen("driver_login.bin","wb");
+					fwrite(&all,sizeof(struct driver),count_2,ptr_driver);
+					break;
+				}
+			}
+			
 		}
 	}
 	for(i=5;i>=1;i--)
