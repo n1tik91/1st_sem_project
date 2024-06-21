@@ -1831,7 +1831,7 @@ void job_apply(char username[])
 								fwrite(&all,sizeof(struct driver),count,ptr_driver);
 								fclose(ptr_driver);
 								system("cls");
-								printf("\n\n\t\t\t\t\t\tApplied Successfully!");
+								printf("\n\n\t\t\t\t\t\t     Applied Successfully!");
 								printf("\n\n\t\t\t\t\t\t\tRedirecting");
 								for(i=5;i>=1;i--)
 								{
@@ -1939,7 +1939,7 @@ void job_apply(char username[])
 							fwrite(&all,sizeof(struct driver),count,ptr_driver);
 							fclose(ptr_driver);
 							system("cls");
-							printf("\n\n\t\t\t\t\t\tApplied Successfully!");
+							printf("\n\n\t\t\t\t\t\t      Applied Successfully!");
 							printf("\n\n\t\t\t\t\t\t\tRedirecting");
 							for(i=5;i>=1;i--)
 							{
