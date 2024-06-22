@@ -30,6 +30,7 @@ void check_report(char []);
 void increase_bus(char []);
 void job_apply(char []);
 void recruit_driver(char []);
+void see_driver_info(char []);
 
 struct bus_company
 {
@@ -999,7 +1000,8 @@ void increase_bus(char username[])
 
 void recruit_driver(char username[])
 {
-	int i,count=0,choice,count_2=0,k;
+	int i,count=0,choice,count_2=0,k,record_count=0;
+	char hired_employee_name[50],quit;
 	FILE *ptr_job,*ptr_driver,*ptr_temp;
 	struct job_application j;
 	struct driver d;
@@ -1043,12 +1045,21 @@ void recruit_driver(char username[])
 	printf("\n\n\t\t\t\t\t\tList of Job Applications are:");
 	while(fread(&j,sizeof(j),1,ptr_job))
 	{
+		record_count++;
 		if(strcmp(j.company_name,username)==0)
 		{
 			count++;
 			printf("\n\n\t\t\t\t\t\t%d. %s",count,j.employee_name);
 			fwrite(&j,sizeof(j),1,ptr_temp);
 		}
+	}
+	if(count == 0)
+	{
+		printf("\n\n\t\t\t\t\t\t   No Job Application!");
+		printf("\n\n\t\t\t\t\t   Enter any thing to go back: ");
+		fflush(stdin);
+		scanf("%c",&quit);
+		bus_company_homepage(username);
 	}
 	while(fread(&d,sizeof(d),1,ptr_driver))
 	{
@@ -1063,7 +1074,16 @@ void recruit_driver(char username[])
 	printf("\n\n\t\t\t\t\t    Choose the driver you want to recruit: ");
 	fflush(stdin);
 	scanf("%d",&choice);
-	rewind(ptr_job);
+	if(choice<0||choice>count)
+	{
+		printf("\n\n\t\t\t\t\tError! Incorrect Option. Try again");
+		for(i=5;i>=1;i--)
+		{
+			printf(".");
+			Sleep(1000);
+		}
+		recruit_driver(username);
+	}
 	for(i=0;i<count;i++)
 	{
 		fread(&j,sizeof(j),1,ptr_temp);
@@ -1073,20 +1093,43 @@ void recruit_driver(char username[])
 			{
 				if(strcmp(all[k].username,j.employee_name)==0)
 				{
+					strcpy(hired_employee_name,all[k].username);
 					all[k].recruit_status='y';
+					strcpy(all[k].affiliated_company,username);
 					ptr_driver = fopen("driver_login.bin","wb");
 					fwrite(&all,sizeof(struct driver),count_2,ptr_driver);
-					break;
+					fclose(ptr_driver);
+					rewind(ptr_temp);
 				}
-			}
-			
+			}	
 		}
 	}
-	for(i=5;i>=1;i--)
+	struct job_application all_job[record_count];
+	rewind(ptr_job);
+	fread(&all_job,sizeof(struct job_application),record_count,ptr_job);
+	fclose(ptr_job);
+	fclose(ptr_temp);
+	ptr_job = fopen("rewrite.bin","wb+");
+	for(i=0;i<record_count;i++)
+	{
+		if(strcmp(all_job[i].employee_name,hired_employee_name)==0)
 		{
-			printf(".");
-			Sleep(1000);
+			continue;
 		}
+		else
+		{
+			fwrite(&all_job[i],sizeof(struct job_application),1,ptr_job);
+		}
+	}
+	fclose(ptr_job);
+	fflush(stdin);
+	remove("job_application.bin");
+	rename("rewrite.bin","job_application.bin");
+	printf("\n\n\t\t\t\t\tDriver has been successfully recruited.");
+	printf("\n\n\t\t\t\t\t   Enter any thing to go back: ");
+	fflush(stdin);
+	scanf("%c",&quit);
+	bus_company_homepage(username);
 }
 
 void driver_f()
@@ -1296,7 +1339,7 @@ void driver_signup()
 		goto pass_reenter;
 	}
 	system("cls");
-	printf("\n\n\n\t\t\t\t\t\t\tBus Company");
+	printf("\n\n\n\t\t\t\t\t\t\tDriver\'s Hub");
 	printf("\n\n\t\t\t\t\t\t\tSignUp Page");
 	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
 	reenter_name:
@@ -1364,15 +1407,13 @@ void driver_homepage(char username[])
 	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
 	printf("\n\n\t\t\t\t\t\t\t  Features");
 	printf("\n\n\n\t  1.Apply Job");
-	printf("\t\t\t\t\t2.Report");
-	printf("\t\t\t    3. Active/Inactive Bus");
+	printf("\t\t\t\t\t\t\t\t\t\t 2. See Info");
 	printf("\n\t     [Press 1]");
-	printf("\t\t\t\t\t[Press 2]");
-	printf("\t\t\t\t   [Press 3]");
-	printf("\n\n\n\t\t  4.Log Out");
-	printf("\t\t\t\t\t\t\t\t  5.Settings");
-	printf("\n\t           [Press 4]");
-	printf("\t\t\t\t\t\t\t\t  [Press 5]");
+	printf("\t\t\t\t\t\t\t\t\t\t[Press 2]");
+	printf("\n\n\n\t\t  3.Log Out");
+	printf("\t\t\t\t\t\t\t\t  4.Settings");
+	printf("\n\t           [Press 3]");
+	printf("\t\t\t\t\t\t\t\t  [Press 4]");
 	printf("\n\n\n\n+----------------------------------------------------------------------------------------------------------------------+");
 	printf("\n\n\n\t\t\t\t\t\t  Enter you choice: ");
 	fflush(stdin);
@@ -1380,15 +1421,13 @@ void driver_homepage(char username[])
 	switch (user_choice)
 	{
 		case 1:
+			fflush(stdin);
 			job_apply(username);
 		break;
 		case 2:
-			printf("hello2");
+			see_driver_info(username);
 		break;
 		case 3:
-			printf("hello3");
-		break;
-		case 4:
 			system("cls");
 			printf("\n\n\n\n\t\t\t\t\t\t\tLogging Out");
 			for(i=5;i>=1;i--)
@@ -1398,7 +1437,7 @@ void driver_homepage(char username[])
 			}
 			main();
 		break;
-		case 5:
+		case 4:
 			driver_setting(username);
 		break;
 		default:
@@ -1793,9 +1832,8 @@ void job_apply(char username[])
 	printf("\n\n\n\t\t\t\t\t\t\tDriver\'s Hub");
 	printf("\n\n\t\t\t\t\t\t  Welcome User %s!",username);
 	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
-	while(!feof(ptr_driver))
+	while(fread(&d,sizeof(d),1,ptr_driver))
 	{
-		fread(&d,sizeof(d),1,ptr_driver);
 		if(strcmp(d.username,username)==0)
 		{
 			if(d.recruit_status=='y')
@@ -1815,15 +1853,14 @@ void job_apply(char username[])
 						printf("\n\n\t\t\t\t\t\t%d %s",count,b.name);
 					}
 					rewind(ptr_driver);
-					while(!feof(ptr_driver))
+					while(fread(&d2,sizeof(d2),1,ptr_driver))
 					{
-						fread(&d2,sizeof(d2),1,ptr_driver);
 						count_driver++;
 					}
 					struct driver all[count_driver];
 					rewind(ptr_company);
 					rewind(ptr_driver);
-					fread(&all,sizeof(struct driver),count,ptr_driver);
+					fread(&all,sizeof(struct driver),count_driver,ptr_driver);
 					fclose(ptr_driver);
 					printf("\n\n\t\t\t\t\t\tEnter your choice:");
 					scanf("%d",&choice);
@@ -1871,7 +1908,7 @@ void job_apply(char username[])
 									}
 								}
 								ptr_driver = fopen("driver_login.bin","wb");
-								fwrite(&all,sizeof(struct driver),count,ptr_driver);
+								fwrite(&all,sizeof(struct driver),count_driver,ptr_driver);
 								fclose(ptr_driver);
 								system("cls");
 								printf("\n\n\t\t\t\t\t\t     Applied Successfully!");
@@ -1883,6 +1920,20 @@ void job_apply(char username[])
 								}
 								driver_homepage(username);
 								break;
+							}
+							else if(user_choice == 2)
+							{
+								driver_homepage(username);
+							}
+							else
+							{
+								printf("\n\n\t\t\t\t\t\tInvalid input! Try Again");
+								for(k=5;k>=1;k--)
+								{
+									printf(".");
+									Sleep(1000);
+								}
+								job_apply(username);
 							}
 						}
 					}
@@ -1921,15 +1972,14 @@ void job_apply(char username[])
 					printf("\n\n\t\t\t\t\t\t%d %s",count,b.name);
 				}
 				rewind(ptr_driver);
-				while(!feof(ptr_driver))
+				while(fread(&d2,sizeof(d2),1,ptr_driver))
 				{
-					fread(&d2,sizeof(d2),1,ptr_driver);
 					count_driver++;
 				}
 				struct driver all[count_driver];
 				rewind(ptr_company);
 				rewind(ptr_driver);
-				fread(&all,sizeof(struct driver),count,ptr_driver);
+				fread(&all,sizeof(struct driver),count_driver,ptr_driver);
 				fclose(ptr_driver);
 				printf("\n\n\t\t\t\t\t\tEnter your choice:");
 				scanf("%d",&choice);
@@ -1977,9 +2027,8 @@ void job_apply(char username[])
 									break;
 								}
 							}
-							printf("%c",all[k].recruit_status);
 							ptr_driver = fopen("driver_login.bin","wb");
-							fwrite(&all,sizeof(struct driver),count,ptr_driver);
+							fwrite(&all,sizeof(struct driver),count_driver,ptr_driver);
 							fclose(ptr_driver);
 							system("cls");
 							printf("\n\n\t\t\t\t\t\t      Applied Successfully!");
@@ -1999,7 +2048,7 @@ void job_apply(char username[])
 						else
 						{
 							printf("\n\n\t\t\t\t\t\tInvalid input! Try Again");
-							for(i=5;i>=1;i--)
+							for(k=5;k>=1;k--)
 							{
 								printf(".");
 								Sleep(1000);
@@ -2012,11 +2061,60 @@ void job_apply(char username[])
 			}
 		}
 	}
-	for(i=5;i>=1;i--)
+}
+
+void see_driver_info(char username[])
+{
+	int i;
+	char quit;
+	struct driver d;
+	FILE *ptr;
+	ptr = fopen("driver_login.bin","rb");
+	if(ptr == NULL)
+	{
+		printf("\n\n\n\n\t\t\t\t\tError in the server!Please Try again");
+		for(i=5;i>=1;i--)
 		{
 			printf(".");
 			Sleep(1000);
 		}
+		main();
+	}
+	system("cls");
+	printf("\n\n\n\t\t\t\t\t\t     Driver\'s Hub");
+	printf("\n\n\t\t\t\t\t\t  Welcome User %s!",username);
+	printf("\n\n+----------------------------------------------------------------------------------------------------------------------+");
+	printf("\n\n\t\t\t\t\t\t  Your details are:");
+	while(fread(&d,sizeof(d),1,ptr))
+	{
+		if(strcmp(username,d.username)==0)
+		{
+			printf("\n\n\t\tt\t\t\t      Username : %s",d.username);
+			printf("\n\n\t\t\t\t\t     Real Name : %s",d.real_name);
+			printf("\n\n\t\t\t\t\t     License Number : %s",d.license_number);
+			if(d.recruit_status == 'n')
+			{
+				printf("\n\n\t\t\t\t\t     Recruit Status : N/A");
+				printf("\n\n\t\t\t\t\t     Affiliated Company : None");
+			}
+			else if(d.recruit_status == 'e')
+			{
+				printf("\n\n\t\t\t\t\t     Recruit Status : Pending");
+				printf("\n\n\t\t\t\t\t     Affiliated Company : None");
+			}
+			else
+			{
+				printf("\n\n\t\t\t\t\t     Recruit Status : Hired");
+				printf("\n\n\t\t\t\t\t     Affiliated Company : %s",d.affiliated_company);
+			}
+			break;
+		}
+	}
+	fclose(ptr);
+	printf("\n\n\t\t\t\t\t   Enter any thing to go back: ");
+	fflush(stdin);
+	scanf("%c",&quit);
+	driver_homepage(username);
 }
 
 void user_f()
